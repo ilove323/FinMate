@@ -43,12 +43,14 @@ from app.api.reconciliation import router as reconciliation_router
 from app.api.tax import router as tax_router
 from app.api.reports import router as reports_router
 from app.api.cost_alloc import router as cost_alloc_router
+from app.api.ai_chat import router as ai_chat_router
 
 app.include_router(dashboard_router)
 app.include_router(reconciliation_router)
 app.include_router(tax_router)
 app.include_router(reports_router)
 app.include_router(cost_alloc_router)
+app.include_router(ai_chat_router)
 
 
 @app.get("/api/v1/health")
