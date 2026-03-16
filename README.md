@@ -45,10 +45,12 @@ FinMate/
 在 `FinMate/` 目录下创建 `.env` 文件：
 
 ```env
-ANTHROPIC_API_KEY=sk-ant-xxxxx
+VOLCENGINE_API_KEY=你的火山引擎API Key
+# 可选，默认 doubao-pro-32k-241215
+# VOLCENGINE_MODEL=doubao-pro-32k-241215
 ```
 
-> AI 对话功能需要有效的 Anthropic API Key。其余功能（对账、税务、报表、成本分摊）不依赖 API Key。
+> AI 对话功能需要有效的火山引擎 API Key（方舟平台）。其余功能（对账、税务、报表、成本分摊）不依赖 API Key。
 
 ### 2. 启动后端
 
@@ -66,7 +68,7 @@ source venv/bin/activate          # macOS/Linux
 pip install -r backend/requirements.txt
 
 # 启动（端口 8000）
-uvicorn backend.app.main:app --reload
+PYTHONPATH=backend uvicorn app.main:app --reload
 ```
 
 首次启动时后端会**自动建表并导入演示数据**，无需手动操作。
@@ -111,7 +113,7 @@ npm run dev
 ```bash
 # 删除数据库文件后重启后端，演示数据会自动重新导入
 rm FinMate/finmate.db
-uvicorn backend.app.main:app --reload
+PYTHONPATH=backend uvicorn app.main:app --reload
 ```
 
 ## 接口文档

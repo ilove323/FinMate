@@ -2,7 +2,7 @@
 
 import json
 
-import anthropic
+from openai import AuthenticationError, BadRequestError
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,12 +23,11 @@ async def stream_chat(body: dict, db: AsyncSession = Depends(get_db)):
         try:
             async for chunk in chat_stream(message, module_context, history, db):
                 yield f"data: {chunk}\n\n"
-        except anthropic.AuthenticationError:
-            err = json.dumps({"type": "error", "content": "API Key 无效，请检查 .env 文件中的 ANTHROPIC_API_KEY。"}, ensure_ascii=False)
+        except AuthenticationError:
+            err = json.dumps({"type": "error", "content": "API Key 无效，请检查 .env 文件中的 VOLCENGINE_API_KEY。"}, ensure_ascii=False)
             yield f"data: {err}\n\n"
-        except anthropic.BadRequestError as e:
-            msg = "账户余额不足，请前往 Anthropic 控制台充值后再试。" if "credit balance" in str(e) else f"请求错误：{e}"
-            err = json.dumps({"type": "error", "content": msg}, ensure_ascii=False)
+        except BadRequestError as e:
+            err = json.dumps({"type": "error", "content": f"请求错误：{e}"}, ensure_ascii=False)
             yield f"data: {err}\n\n"
         except Exception as e:
             err = json.dumps({"type": "error", "content": f"AI 服务异常：{e}"}, ensure_ascii=False)
