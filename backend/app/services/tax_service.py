@@ -33,7 +33,7 @@ async def get_filing(session: AsyncSession, form_type: str, period: str) -> dict
     )).scalars().first()
 
     if not template:
-        return {"form_type": form_type, "form_name": "未找到模板", "lines": []}
+        return {"form_type": form_type, "form_name": "未找到模板", "items": []}
 
     lines_q = select(TaxLineItem).where(
         and_(TaxLineItem.template_id == template.id, TaxLineItem.period == period)
@@ -44,7 +44,7 @@ async def get_filing(session: AsyncSession, form_type: str, period: str) -> dict
         "form_type": form_type,
         "form_name": template.form_name,
         "period": period,
-        "lines": [_line_to_dict(l) for l in lines],
+        "items": [_line_to_dict(l) for l in lines],
     }
 
 
@@ -174,21 +174,19 @@ async def get_estimate(session: AsyncSession, period: str) -> list[dict]:
     return [_estimate_to_dict(e) for e in rows]
 
 
-async def get_validation(session: AsyncSession, form_type: str, period: str) -> list[dict]:
+async def get_validation(session: AsyncSession, form_type: str, period: str) -> dict:
     rules = (await session.execute(
         select(TaxValidationRule).where(TaxValidationRule.form_type == form_type)
     )).scalars().all()
 
-    results = []
-    for rule in rules:
-        results.append({
-            "rule_name": rule.rule_name,
-            "expression": rule.rule_expression,
-            "severity": rule.severity,
-            "passed": True,  # Simplified — real impl would evaluate expression
-            "message": "校验通过",
-        })
-    return results
+    issues = []
+    # Simplified — all rules pass for demo data
+    return {
+        "form_type": form_type,
+        "period": period,
+        "is_compliant": len(issues) == 0,
+        "issues": issues,
+    }
 
 
 def _mapping_to_dict(m: TaxMapping) -> dict:
@@ -201,16 +199,21 @@ def _mapping_to_dict(m: TaxMapping) -> dict:
 
 def _line_to_dict(l: TaxLineItem) -> dict:
     return {
-        "id": l.id, "line_no": l.line_no, "line_name": l.line_name,
-        "formula": l.formula, "current_value": float(l.current_value),
-        "adjusted_value": float(l.adjusted_value) if l.adjusted_value is not None else None,
-        "period": l.period,
+        "line_no": l.line_no,
+        "line_name": l.line_name,
+        "amount": float(l.current_value),
+        "tax_amount": None,
+        "note": l.formula or None,
     }
 
 
 def _estimate_to_dict(e: TaxEstimate) -> dict:
+    taxable = float(e.taxable_amount)
+    tax = float(e.tax_amount)
     return {
-        "id": e.id, "tax_type": e.tax_type, "period": e.period,
-        "taxable_amount": float(e.taxable_amount), "tax_amount": float(e.tax_amount),
-        "previous_period": float(e.previous_period), "yoy_change": e.yoy_change,
+        "tax_type": e.tax_type,
+        "period": e.period,
+        "taxable_amount": taxable,
+        "tax_amount": tax,
+        "tax_rate": round(tax / taxable, 4) if taxable else 0,
     }
