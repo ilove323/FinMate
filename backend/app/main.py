@@ -37,6 +37,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Register routers
+from app.api.dashboard import router as dashboard_router
+from app.api.reconciliation import router as reconciliation_router
+from app.api.tax import router as tax_router
+from app.api.reports import router as reports_router
+from app.api.cost_alloc import router as cost_alloc_router
+
+app.include_router(dashboard_router)
+app.include_router(reconciliation_router)
+app.include_router(tax_router)
+app.include_router(reports_router)
+app.include_router(cost_alloc_router)
+
 
 @app.get("/api/v1/health")
 async def health_check():
