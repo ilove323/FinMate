@@ -16,7 +16,7 @@ async def get_accounts(db: AsyncSession = Depends(get_db)):
     )).scalars().all()
     return success([{
         "code": r.code, "name": r.name,
-        "account_type": r.account_type, "direction": r.direction,
+        "account_type": r.account_type, "direction": r.balance_direction,
         "level": r.level, "parent_code": r.parent_code,
     } for r in rows])
 
@@ -34,7 +34,7 @@ async def get_balances(period: str = Query(...), db: AsyncSession = Depends(get_
         "debit_amount": float(r.debit_amount),
         "credit_amount": float(r.credit_amount),
         "closing_balance": float(r.closing_balance),
-        "direction": r.direction,
+        "direction": r.balance_direction,
     } for r in rows])
 
 
@@ -55,7 +55,7 @@ async def get_entries(
         "id": r.id, "voucher_no": r.voucher_no,
         "entry_date": str(r.entry_date),
         "account_code": r.account_code, "account_name": r.account_name,
-        "direction": r.direction,
+        "direction": r.balance_direction,
         "debit_amount": float(r.amount) if r.direction == "debit" else 0,
         "credit_amount": float(r.amount) if r.direction == "credit" else 0,
         "summary": r.summary, "auxiliary": r.auxiliary,
