@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+import app.models  # noqa: F401 — register all models for Base.metadata
 from app.database import init_db
 
 
