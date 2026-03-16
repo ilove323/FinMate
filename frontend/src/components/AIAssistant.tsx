@@ -59,6 +59,8 @@ export default function AIAssistant() {
         const c = chunk as { type: string; content?: string; tool?: string };
         if (c.type === 'text' && c.content) {
           appendToLastAssistant(c.content);
+        } else if (c.type === 'error' && c.content) {
+          appendToLastAssistant('⚠️ ' + c.content);
         }
       },
       () => setStreaming(false),
