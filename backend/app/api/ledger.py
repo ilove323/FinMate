@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -45,7 +45,7 @@ async def get_entries(
     db: AsyncSession = Depends(get_db),
 ):
     q = select(BookEntry).where(
-        BookEntry.entry_date.cast("text").startswith(period)
+        func.strftime("%Y-%m", BookEntry.entry_date) == period
     )
     if account_code:
         q = q.where(BookEntry.account_code.startswith(account_code))
