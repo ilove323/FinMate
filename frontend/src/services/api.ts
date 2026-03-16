@@ -51,14 +51,19 @@ export const getDashboardSummary = () =>
 export const getReconciliationStatus = (period?: string) =>
   get<ReconciliationStatus>(`${BASE}/reconciliation/status`, period ? { period } : undefined);
 
-export const getBankTransactions = (params?: {
+export const getBankTransactions = async (params?: {
   period?: string;
   status?: string;
   counterparty?: string;
-}) => get<BankTransaction[]>(`${BASE}/reconciliation/transactions`, params as Record<string, string>);
+}): Promise<BankTransaction[]> => {
+  const res = await get<{ items: BankTransaction[] }>(`${BASE}/reconciliation/transactions`, params as Record<string, string>);
+  return res.items ?? [];
+};
 
-export const getBookEntries = (params?: { period?: string; account_code?: string }) =>
-  get<BookEntry[]>(`${BASE}/reconciliation/entries`, params as Record<string, string>);
+export const getBookEntries = async (params?: { period?: string; account_code?: string }): Promise<BookEntry[]> => {
+  const res = await get<{ items: BookEntry[] }>(`${BASE}/reconciliation/entries`, params as Record<string, string>);
+  return res.items ?? [];
+};
 
 export const getUnmatchedItems = (period: string) =>
   get<UnmatchedItems>(`${BASE}/reconciliation/unmatched`, { period });

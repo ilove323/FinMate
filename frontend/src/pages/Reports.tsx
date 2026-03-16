@@ -16,8 +16,14 @@ const REPORT_TYPES = [
   { value: 'cash_flow', label: '现金流量表' },
 ];
 
-const indicatorStatus: Record<string, string> = {
-  healthy: 'green', warning: 'orange', danger: 'red',
+const healthColor: Record<string, string> = {
+  good: 'green', warning: 'orange', danger: 'red',
+};
+const healthLabel: Record<string, string> = {
+  good: '良好', warning: '注意', danger: '风险',
+};
+const healthValueColor: Record<string, string> = {
+  good: '#3f8600', warning: '#d46b08', danger: '#cf1322',
 };
 
 export default function Reports() {
@@ -73,28 +79,28 @@ export default function Reports() {
     { title: '行次', dataIndex: 'line_no', width: 60, align: 'center' },
     {
       title: '本期金额',
-      dataIndex: 'amount',
+      dataIndex: 'current_amount',
       align: 'right',
       width: 140,
       render: (v: number, row) => (
         <span style={{ fontWeight: row.is_total ? 600 : 400 }}>
-          <AmountCell value={v} />
+          <AmountCell value={v ?? 0} />
         </span>
       ),
     },
     {
       title: '上期金额',
-      dataIndex: 'prev_amount',
+      dataIndex: 'previous_amount',
       align: 'right',
       width: 140,
-      render: (v?: number) => v != null ? <AmountCell value={v} /> : '-',
+      render: (v: number | null) => v != null ? <AmountCell value={v} /> : '-',
     },
     {
       title: '同比变动',
       dataIndex: 'yoy_change',
       align: 'right',
       width: 100,
-      render: (v?: number) => v != null ? (
+      render: (v: number | null) => v != null ? (
         <Tag color={v > 0 ? 'green' : v < 0 ? 'red' : 'default'}>{v > 0 ? '+' : ''}{v.toFixed(1)}%</Tag>
       ) : '-',
     },
@@ -120,17 +126,17 @@ export default function Reports() {
       {/* Financial indicators */}
       <Row gutter={16} style={{ marginBottom: 16 }}>
         {indicators.map((ind) => (
-          <Col span={6} key={ind.name}>
+          <Col span={6} key={ind.indicator_name}>
             <Card bordered={false} size="small">
               <Statistic
-                title={ind.name}
-                value={ind.value}
-                suffix={ind.unit}
+                title={ind.indicator_name}
+                value={ind.indicator_value}
                 precision={2}
-                valueStyle={{ color: ind.status === 'healthy' ? '#3f8600' : ind.status === 'warning' ? '#d46b08' : '#cf1322', fontSize: 20 }}
+                valueStyle={{ color: healthValueColor[ind.health_status] ?? '#000', fontSize: 20 }}
               />
-              <Tag color={indicatorStatus[ind.status]} style={{ marginTop: 4 }}>
-                {ind.status === 'healthy' ? '良好' : ind.status === 'warning' ? '注意' : '风险'}
+              <div style={{ marginTop: 4, fontSize: 12, color: '#888' }}>{ind.description}</div>
+              <Tag color={healthColor[ind.health_status]} style={{ marginTop: 4 }}>
+                {healthLabel[ind.health_status]}
               </Tag>
             </Card>
           </Col>

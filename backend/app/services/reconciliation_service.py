@@ -274,10 +274,13 @@ async def get_unmatched(session: AsyncSession, period: str) -> dict:
 
 
 def _txn_to_dict(t: BankTransaction) -> dict:
+    amt = float(t.amount)
     return {
         "id": t.id, "account_no": t.account_no,
-        "transaction_date": str(t.transaction_date), "amount": float(t.amount),
+        "transaction_date": str(t.transaction_date), "amount": abs(amt),
+        "direction": "credit" if amt > 0 else "debit",
         "counterparty": t.counterparty, "summary": t.summary,
+        "description": t.summary,
         "serial_no": t.serial_no, "currency": t.currency,
         "matched_status": t.matched_status,
     }

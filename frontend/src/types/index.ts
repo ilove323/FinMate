@@ -24,6 +24,7 @@ export interface BankTransaction {
   amount: number;
   direction: 'debit' | 'credit';
   counterparty: string;
+  summary: string;
   description: string;
   matched_status: 'unmatched' | 'matched' | 'confirmed' | 'excluded';
   matched_entry_id?: number;
@@ -35,9 +36,9 @@ export interface BookEntry {
   entry_date: string;
   account_code: string;
   account_name: string;
-  debit_amount: number;
-  credit_amount: number;
-  description: string;
+  amount: number;
+  direction: 'debit' | 'credit';
+  summary: string;
   matched_status: string;
 }
 
@@ -92,9 +93,9 @@ export interface TaxValidation {
 export interface ReportLine {
   line_no: string;
   line_name: string;
-  amount: number;
-  prev_amount?: number;
-  yoy_change?: number;
+  current_amount: number;
+  previous_amount: number;
+  yoy_change: number | null;
   indent_level: number;
   is_total: boolean;
 }
@@ -106,11 +107,11 @@ export interface FinancialReport {
 }
 
 export interface FinancialIndicator {
-  name: string;
-  value: number;
-  unit: string;
-  benchmark?: number;
-  status: 'healthy' | 'warning' | 'danger';
+  indicator_name: string;
+  indicator_value: number;
+  benchmark_value: number | null;
+  health_status: 'good' | 'warning' | 'danger';
+  description: string;
 }
 
 export interface DrillDownItem {
@@ -120,6 +121,7 @@ export interface DrillDownItem {
   voucher_no?: string;
   entry_date?: string;
   description?: string;
+  summary?: string;
 }
 
 // ─── Cost Allocation ──────────────────────────────────────────────────────────

@@ -30,7 +30,7 @@ const columns: ColumnsType<BankTransaction> = [
     render: (v: number) => <AmountCell value={v} />,
   },
   { title: '对方户名', dataIndex: 'counterparty', ellipsis: true },
-  { title: '摘要', dataIndex: 'description', ellipsis: true },
+  { title: '摘要', dataIndex: 'summary', ellipsis: true },
   {
     title: '状态', dataIndex: 'matched_status', width: 90,
     render: (v: string) => <Tag color={statusColor[v]}>{statusLabel[v]}</Tag>,
