@@ -69,7 +69,7 @@ export const getUnmatchedItems = (period: string) =>
   get<UnmatchedItems>(`${BASE}/reconciliation/unmatched`, { period });
 
 export const runAutoMatch = (period: string) =>
-  post<{ matched: number }>('/reconciliation/auto-match', { period });
+  post<{ matched: number }>('/reconciliation/match', { period });
 
 export const manualMatch = (txn_id: number, entry_id: number) =>
   post<{ success: boolean }>('/reconciliation/manual-match', { txn_id, entry_id });
@@ -77,16 +77,16 @@ export const manualMatch = (txn_id: number, entry_id: number) =>
 // ─── Tax ──────────────────────────────────────────────────────────────────────
 
 export const getTaxFiling = (form_type: string, period: string) =>
-  get<TaxFiling>(`${BASE}/tax/filing`, { form_type, period });
+  get<TaxFiling>(`${BASE}/tax/filing/${form_type}`, { period });
 
 export const getTaxEstimate = (period: string) =>
   get<TaxEstimateItem[]>(`${BASE}/tax/estimate`, { period });
 
 export const getTaxValidation = (form_type: string, period: string) =>
-  get<TaxValidation>(`${BASE}/tax/validation`, { form_type, period });
+  get<TaxValidation>(`${BASE}/tax/validation/${form_type}`, { period });
 
 export const generateTaxFiling = (form_type: string, period: string) =>
-  post<TaxFiling>('/tax/generate', { form_type, period });
+  post<TaxFiling>('/tax/filing/generate', { form_type, period });
 
 // ─── Reports ──────────────────────────────────────────────────────────────────
 
