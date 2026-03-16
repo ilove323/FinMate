@@ -24,11 +24,11 @@ FinMate/
 │   └── requirements.txt
 ├── frontend/
 │   └── src/
-│       ├── components/     # AIAssistant、PeriodSelector、AmountCell
-│       ├── pages/          # Dashboard、Reconciliation、Tax、Reports、CostAlloc
-│       ├── services/api.ts # 后端 API 客户端（含 SSE streamChat）
-│       ├── store/          # Zustand stores（period、chat）
-│       └── types/          # TypeScript 类型定义
+│       ├── components/     # AI助理面板、期间选择器、金额单元格
+│       ├── pages/          # 仪表盘、对账、税务、报表、成本分摊
+│       ├── services/api.ts # 后端接口客户端（含 SSE 流式对话）
+│       ├── store/          # 全局状态（期间、对话）
+│       └── types/          # 类型定义
 └── docs/
     └── superpowers/plans/  # 实施计划文档
 ```
@@ -69,9 +69,9 @@ pip install -r backend/requirements.txt
 uvicorn backend.app.main:app --reload
 ```
 
-首次启动时后端会**自动建表并导入 mock 数据**，无需手动操作。
+首次启动时后端会**自动建表并导入演示数据**，无需手动操作。
 
-日志示例：
+启动成功日志：
 ```
 INFO:     Started server process [xxxxx]
 INFO:     Waiting for application startup.
@@ -88,7 +88,7 @@ npm run dev
 
 前端默认运行在 http://localhost:5173，API 请求通过 Vite proxy 转发至 `http://localhost:8000`。
 
-## Mock 数据说明
+## 演示数据说明
 
 种子数据模拟公司：**星辰科技有限公司**，期间 **2024-01 ~ 2024-03**。
 
@@ -104,26 +104,26 @@ npm run dev
 | 税务映射 | 6 条 |
 | 报表模板 | 资产负债表 + 利润表 + 现金流量表共 51 行 |
 
-数据通过 `backend/app/mock/seed.py` 的 `run_seed()` 函数生成，使用固定随机种子（`random.seed(42)`）保证可复现性。
+数据由 `backend/app/mock/seed.py` 的 `run_seed()` 函数生成，使用固定随机种子（`random.seed(42)`）保证每次结果一致。
 
 ### 重置数据库
 
 ```bash
-# 删除数据库文件后重启后端即可重新 seed
+# 删除数据库文件后重启后端，演示数据会自动重新导入
 rm FinMate/finmate.db
 uvicorn backend.app.main:app --reload
 ```
 
-## API 文档
+## 接口文档
 
-后端启动后访问：
+后端启动后访问（自动生成）：
 
-- Swagger UI：http://localhost:8000/docs
-- ReDoc：http://localhost:8000/redoc
+- 交互式文档（Swagger）：http://localhost:8000/docs
+- 只读文档（ReDoc）：http://localhost:8000/redoc
 
-## 主要 API 端点
+## 主要接口
 
-| 模块 | 端点 |
+| 模块 | 接口 |
 |------|------|
 | 仪表盘 | `GET /api/v1/dashboard/summary` |
 | 银行对账 | `GET /api/v1/reconciliation/status` |
@@ -139,9 +139,9 @@ uvicorn backend.app.main:app --reload
 
 ## AI 对话说明
 
-右侧面板为 AI 财务助理，切换菜单时自动切换 `module_context`，Agent 会按当前模块选取相关工具（共 13 个）进行多步推理（最多 5 轮 tool_use）。
+右侧面板为 AI 财务助理，切换菜单页面时自动切换模块上下文，智能体会按当前模块筛选相关工具（共 13 个），进行多步推理（最多 5 轮工具调用）。
 
-SSE 事件格式：
+流式事件格式（SSE）：
 ```
 data: {"type": "text", "content": "..."}\n\n
 data: {"type": "tool_call", "tool": "query_bank_transactions", "input": {...}}\n\n
