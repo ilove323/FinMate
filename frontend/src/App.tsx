@@ -6,6 +6,7 @@ import {
   AuditOutlined,
   BarChartOutlined,
   ApartmentOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import AIAssistant from './components/AIAssistant'
@@ -18,11 +19,13 @@ const Reconciliation = lazy(() => import('./pages/Reconciliation'))
 const Tax = lazy(() => import('./pages/Tax'))
 const Reports = lazy(() => import('./pages/Reports'))
 const CostAlloc = lazy(() => import('./pages/CostAlloc'))
+const Ledger = lazy(() => import('./pages/Ledger'))
 
 const { Sider, Content } = Layout
 
 const menuItems = [
   { key: '/', icon: <DashboardOutlined />, label: '仪表盘', ctx: null },
+  { key: '/ledger', icon: <FileTextOutlined />, label: '账簿数据', ctx: null },
   { key: '/reconciliation', icon: <BankOutlined />, label: '银行对账', ctx: 'reconciliation' },
   { key: '/tax', icon: <AuditOutlined />, label: '税务准备', ctx: 'tax' },
   { key: '/reports', icon: <BarChartOutlined />, label: '财务报表', ctx: 'reports' },
@@ -83,6 +86,7 @@ function AppLayout() {
                 <Route path="/tax" element={<Tax />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/cost-alloc" element={<CostAlloc />} />
+                <Route path="/ledger" element={<Ledger />} />
               </Routes>
             </Suspense>
           </Content>
