@@ -2,15 +2,23 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import func, select
 
 from app.config import settings
 import app.models  # noqa: F401 — register all models for Base.metadata
-from app.database import init_db
+from app.database import init_db, async_session
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    # Auto-seed if database is empty
+    async with async_session() as session:
+        from app.models.base import ChartOfAccounts
+        result = await session.execute(select(func.count()).select_from(ChartOfAccounts))
+        if result.scalar() == 0:
+            from app.mock.seed import run_seed
+            await run_seed()
     yield
 
 
