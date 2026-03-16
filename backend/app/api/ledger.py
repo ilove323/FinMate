@@ -55,7 +55,7 @@ async def get_entries(
         "id": r.id, "voucher_no": r.voucher_no,
         "entry_date": str(r.entry_date),
         "account_code": r.account_code, "account_name": r.account_name,
-        "direction": r.balance_direction,
+        "direction": r.direction,
         "debit_amount": float(r.amount) if r.direction == "debit" else 0,
         "credit_amount": float(r.amount) if r.direction == "credit" else 0,
         "summary": r.summary, "auxiliary": r.auxiliary,
