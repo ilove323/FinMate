@@ -177,12 +177,19 @@ export interface AllocationSummary {
 
 export type ChatRole = 'user' | 'assistant';
 
+export interface ActionButton {
+  label: string;
+  message: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: ChatRole;
   content: string;
   timestamp: Date;
   toolCalls?: Array<{ tool: string; input: Record<string, unknown> }>;
+  actions?: ActionButton[];
+  isProactive?: boolean;
 }
 
 export type ModuleContext = 'reconciliation' | 'tax' | 'reports' | 'cost_alloc' | null;

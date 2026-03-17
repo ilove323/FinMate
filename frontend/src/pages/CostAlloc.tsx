@@ -5,7 +5,7 @@ import {
 import ReactECharts from 'echarts-for-react';
 import type { ColumnsType } from 'antd/es/table';
 import { getAllocationResults, getCostPools, runCalculation } from '../services/api';
-import { usePeriodStore } from '../store';
+import { usePeriodStore, useChatStore } from '../store';
 import AmountCell from '../components/AmountCell';
 import type { AllocationResult, CostPool, SankeyData } from '../types';
 
@@ -55,6 +55,7 @@ function buildSankeyOption(sankey: SankeyData) {
 
 export default function CostAlloc() {
   const { period } = usePeriodStore();
+  const { refreshTrigger } = useChatStore();
   const [pools, setPools] = useState<CostPool[]>([]);
   const [results, setResults] = useState<AllocationResult[]>([]);
   const [sankey, setSankey] = useState<SankeyData | null>(null);
@@ -83,6 +84,7 @@ export default function CostAlloc() {
   };
 
   useEffect(() => { load(); }, [period]);
+  useEffect(() => { if (refreshTrigger?.module === 'cost_alloc') load(); }, [refreshTrigger]);
 
   const handleCalculate = async () => {
     setCalculating(true);

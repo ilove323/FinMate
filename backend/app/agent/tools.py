@@ -199,11 +199,58 @@ AGENT_TOOLS = [
             },
         },
     },
+    # Write actions (dry_run=true 模拟, dry_run=false 真实写入)
+    {
+        "type": "function",
+        "function": {
+            "name": "auto_match_reconciliation",
+            "description": "执行银行流水自动对账匹配。dry_run=true 时仅模拟不写入，返回预计匹配数量和金额摘要；dry_run=false 时真实写入匹配结果",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "period": {"type": "string", "description": "期间，格式 YYYY-MM"},
+                    "dry_run": {"type": "boolean", "description": "true=模拟预览，false=真实执行写入"},
+                },
+                "required": ["period", "dry_run"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "generate_tax_filing",
+            "description": "生成税务申报表数据。dry_run=true 时仅模拟不保存，返回将生成的行项目预览；dry_run=false 时真实生成并保存",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "form_type": {"type": "string", "description": "申报表类型: vat_general 或 cit_quarterly"},
+                    "period": {"type": "string", "description": "期间，格式 YYYY-MM"},
+                    "dry_run": {"type": "boolean", "description": "true=模拟预览，false=真实执行写入"},
+                },
+                "required": ["form_type", "period", "dry_run"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "run_cost_allocation",
+            "description": "执行成本分摊计算。dry_run=true 时仅模拟不保存，返回分摊结果预览；dry_run=false 时真实计算并保存",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "period": {"type": "string", "description": "期间，格式 YYYY-MM"},
+                    "dry_run": {"type": "boolean", "description": "true=模拟预览，false=真实执行写入"},
+                },
+                "required": ["period", "dry_run"],
+            },
+        },
+    },
 ]
 
 MODULE_TOOLS = {
-    "reconciliation": ["query_bank_transactions", "query_book_entries", "get_reconciliation_status", "analyze_unmatched_items"],
-    "tax": ["query_tax_data", "calculate_tax_estimate", "check_tax_compliance"],
+    "reconciliation": ["query_bank_transactions", "query_book_entries", "get_reconciliation_status", "analyze_unmatched_items", "auto_match_reconciliation"],
+    "tax": ["query_tax_data", "calculate_tax_estimate", "check_tax_compliance", "generate_tax_filing"],
     "reports": ["generate_financial_report", "calculate_financial_indicators", "drill_down_report_item"],
-    "cost_alloc": ["query_cost_allocation", "simulate_allocation", "compare_allocation_schemes"],
+    "cost_alloc": ["query_cost_allocation", "simulate_allocation", "compare_allocation_schemes", "run_cost_allocation"],
 }

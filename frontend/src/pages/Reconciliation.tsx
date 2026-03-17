@@ -6,7 +6,7 @@ import type { ColumnsType } from 'antd/es/table';
 import {
   getBankTransactions, getReconciliationStatus, runAutoMatch,
 } from '../services/api';
-import { usePeriodStore } from '../store';
+import { usePeriodStore, useChatStore } from '../store';
 import AmountCell from '../components/AmountCell';
 import type { BankTransaction, ReconciliationStatus } from '../types';
 
@@ -39,6 +39,7 @@ const columns: ColumnsType<BankTransaction> = [
 
 export default function Reconciliation() {
   const { period } = usePeriodStore();
+  const { refreshTrigger } = useChatStore();
   const [status, setStatus] = useState<ReconciliationStatus | null>(null);
   const [txns, setTxns] = useState<BankTransaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +64,7 @@ export default function Reconciliation() {
   };
 
   useEffect(() => { load(); }, [period]);
+  useEffect(() => { if (refreshTrigger?.module === 'reconciliation') load(); }, [refreshTrigger]);
 
   const handleAutoMatch = async () => {
     setMatching(true);

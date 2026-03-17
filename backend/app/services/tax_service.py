@@ -48,7 +48,7 @@ async def get_filing(session: AsyncSession, form_type: str, period: str) -> dict
     }
 
 
-async def generate_filing(session: AsyncSession, form_type: str, period: str) -> dict:
+async def generate_filing(session: AsyncSession, form_type: str, period: str, dry_run: bool = False) -> dict:
     """Generate filing data from account balances using tax mappings."""
     mappings = (await session.execute(
         select(TaxMapping).where(TaxMapping.tax_form_type == form_type)
@@ -61,14 +61,15 @@ async def generate_filing(session: AsyncSession, form_type: str, period: str) ->
     if not template:
         return {"error": "Template not found"}
 
-    # Delete existing line items for this period
-    existing = (await session.execute(
-        select(TaxLineItem).where(
-            and_(TaxLineItem.template_id == template.id, TaxLineItem.period == period)
-        )
-    )).scalars().all()
-    for item in existing:
-        await session.delete(item)
+    # Delete existing line items for this period (skip in dry_run)
+    if not dry_run:
+        existing = (await session.execute(
+            select(TaxLineItem).where(
+                and_(TaxLineItem.template_id == template.id, TaxLineItem.period == period)
+            )
+        )).scalars().all()
+        for item in existing:
+            await session.delete(item)
 
     generated_lines = []
     for mapping in mappings:
@@ -98,7 +99,8 @@ async def generate_filing(session: AsyncSession, form_type: str, period: str) ->
             line_name=mapping.tax_line_name, formula=f"FROM:{mapping.account_code}:{mapping.data_source}",
             current_value=value, adjusted_value=None, period=period,
         )
-        session.add(line)
+        if not dry_run:
+            session.add(line)
         generated_lines.append(line)
 
     # Add computed lines (VAT payable = output - input)
@@ -106,14 +108,25 @@ async def generate_filing(session: AsyncSession, form_type: str, period: str) ->
         output_tax = sum(l.current_value for l in generated_lines if l.line_no == "11")
         input_tax = sum(l.current_value for l in generated_lines if l.line_no == "12")
         payable = output_tax - input_tax
-        session.add(TaxLineItem(
+        computed = TaxLineItem(
             template_id=template.id, line_no="19", line_name="应纳税额",
             formula="line_11 - line_12", current_value=payable, adjusted_value=None, period=period,
-        ))
+        )
+        if not dry_run:
+            session.add(computed)
+        generated_lines.append(computed)
 
-    await session.flush()
+    if not dry_run:
+        await session.flush()
+        return await get_filing(session, form_type, period)
 
-    return await get_filing(session, form_type, period)
+    return {
+        "dry_run": True,
+        "form_type": form_type,
+        "form_name": template.form_name,
+        "period": period,
+        "items": [_line_to_dict(l) for l in generated_lines],
+    }
 
 
 async def adjust_line(session: AsyncSession, line_id: int, adjusted_value: float, reason: str) -> dict:

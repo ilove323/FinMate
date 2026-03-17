@@ -4,7 +4,7 @@ import {
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { getTaxFiling, getTaxEstimate, getTaxValidation, generateTaxFiling } from '../services/api';
-import { usePeriodStore } from '../store';
+import { usePeriodStore, useChatStore } from '../store';
 import AmountCell from '../components/AmountCell';
 import type { TaxLineItem, TaxEstimateItem, TaxValidation } from '../types';
 
@@ -30,6 +30,7 @@ const lineColumns: ColumnsType<TaxLineItem> = [
 
 export default function Tax() {
   const { period } = usePeriodStore();
+  const { refreshTrigger } = useChatStore();
   const [formType, setFormType] = useState('vat_general');
   const [items, setItems] = useState<TaxLineItem[]>([]);
   const [estimates, setEstimates] = useState<TaxEstimateItem[]>([]);
@@ -58,6 +59,7 @@ export default function Tax() {
   };
 
   useEffect(() => { load(); }, [period, formType]);
+  useEffect(() => { if (refreshTrigger?.module === 'tax') load(); }, [refreshTrigger]);
 
   const handleGenerate = async () => {
     setGenerating(true);

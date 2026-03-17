@@ -108,8 +108,8 @@ async def get_reconciliation_status(session: AsyncSession, period: str | None = 
     }
 
 
-async def run_auto_match(session: AsyncSession, period: str) -> dict:
-    """Three-tier matching: exact → fuzzy → smart."""
+async def run_auto_match(session: AsyncSession, period: str, dry_run: bool = False) -> dict:
+    """Three-tier matching: exact → fuzzy → smart. dry_run=True skips DB writes."""
     # Get unmatched transactions and book entries for the period
     bank_q = select(BankTransaction).where(
         and_(
@@ -212,11 +212,16 @@ async def run_auto_match(session: AsyncSession, period: str) -> dict:
             if txn.id in matched_bank_ids:
                 break
 
-    await session.flush()
+    if not dry_run:
+        await session.flush()
 
+    total_amount = sum(abs(float(t.amount)) for t in bank_txns if t.id in matched_bank_ids)
     return {
+        "dry_run": dry_run,
         "matched": len(matched_bank_ids),
         "unmatched": len(bank_txns) - len(matched_bank_ids),
+        "total_amount": total_amount,
+        "summary": f"{'将匹配' if dry_run else '已匹配'} {len(matched_bank_ids)} 条流水，涉及金额 ¥{total_amount:,.2f}",
         "details": details,
     }
 
